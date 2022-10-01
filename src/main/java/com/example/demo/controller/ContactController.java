@@ -1,9 +1,8 @@
 package com.example.demo.controller;
 
-import com.example.demo.Model.Contact;
-import com.example.demo.Service.ContactService;
+import com.example.demo.model.Contact;
+import com.example.demo.service.implementation.ContactServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
@@ -18,12 +17,12 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @Controller
 public class ContactController {
 
-    private final ContactService contactService;
+    private final ContactServiceImpl contactService;
 
-    @Autowired
-    public ContactController(ContactService contactService) {
+    public ContactController(ContactServiceImpl contactService) {
         this.contactService = contactService;
     }
+
 
     @RequestMapping("/contact")
     public String displayContactPage(Model model) {
@@ -32,18 +31,19 @@ public class ContactController {
     }
 
 
+    @RequestMapping(value = "/saveMsg", method = POST)
+    public String saveMessage(@Valid @ModelAttribute("contact") Contact contact, Errors errors) {
 
-    @RequestMapping(value = "/saveMsg",method = POST)
-    public String saveMessage(@Valid @ModelAttribute("contact") Contact contact, Errors errors){
-
-        if(errors.hasErrors()){
+        if (errors.hasErrors()) {
             log.error("Contact form validation failed due to : " + errors.toString());
             return "contact.html";
         }
         contactService.saveMessageDetails(contact);
+        contactService.setCounter(contactService.getCounter() + 1);
+        log.info("Number of times the Contact form is created" + contactService.getCounter());
+
         return "redirect:/contact";
     }
-
 
 
 }
